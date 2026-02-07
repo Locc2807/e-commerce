@@ -54,7 +54,7 @@ public class UserWebController {
 		}
 
 		model.addAttribute("newProducts", productService.findTop3Latest());
-		model.addAttribute("topProducts", productService.findAll()); 
+		model.addAttribute("topProducts", productService.findTop3Latest());
 
 		return "index";
 	}
@@ -414,7 +414,7 @@ public class UserWebController {
 			return "redirect:/accessories?page=" + accessoryPage.getTotalPages();
 		}
 
-		List<Product> topSelling = productService.findTop3LatestCamerasByCategory("accessories");
+		List<Product> topSelling = productService.findTop3LatestAccessoriesByCategory("accessories");
 
 		model.addAttribute("products", accessoryPage.getContent());
 		model.addAttribute("totalPages", accessoryPage.getTotalPages());

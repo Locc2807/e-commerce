@@ -30,6 +30,26 @@ public class LaptopController {
 	@Autowired
 	private ReviewService reviewService;
 
+	// Product Detail Page
+	@GetMapping("/product/{id}")
+	public String productDetail(@PathVariable("id") Long id, Model model) {
+		Product p = productService.findById(id).orElse(null);
+		if (p == null)
+			return "redirect:/";
+
+		ProductDTO dto = new ProductDTO(p);
+		model.addAttribute("product", dto);
+		model.addAttribute("reviews", reviewService.findByProductId(id));
+
+		// Sản phẩm liên quan
+		Long categoryId = p.getCategory() != null ? p.getCategory().getId().longValue() : null;
+		List<Product> related = (categoryId != null) ? productService.findRelatedProducts(categoryId, p.getId())
+				: List.of();
+		model.addAttribute("relatedProducts", related);
+
+		return "quickview";
+	}
+
 	@GetMapping("/product/quickview/{id}")
 	public String quickViewLaptop(@PathVariable("id") Long id, Model model) {
 		Product p = productService.findById(id).orElse(null);

@@ -19,6 +19,9 @@ import com.bkap.repository.ProductRepository;
 public class ProductServiceImpl implements ProductService {
 	@Autowired
 	private ProductRepository productRepository;
+	
+	@Autowired
+	private com.bkap.repository.OrderDetailRepository orderDetailRepository;
 
 	@Override
 	public List<Product> getAll() {
@@ -248,5 +251,33 @@ public class ProductServiceImpl implements ProductService {
 	public List<Product> findRelatedProducts(Long categoryId, Long excludeId) {
 		// TODO Auto-generated method stub
 		return productRepository.findTop4ByCategoryIdAndIdNot(categoryId, excludeId);
+	}
+
+	// ==== Top Selling Products (based on actual sales) ====
+	
+	@Override
+	public List<Product> findTop3BestSelling() {
+		Pageable pageable = PageRequest.of(0, 3);
+		List<Product> bestSelling = orderDetailRepository.findTopSellingProducts(pageable);
+		
+		// Fallback: Nếu chưa có đơn hàng nào, trả về sản phẩm mới nhất
+		if (bestSelling.isEmpty()) {
+			return findTop3Latest();
+		}
+		
+		return bestSelling;
+	}
+	
+	@Override
+	public List<Product> findTop3BestSellingByCategory(String categoryName) {
+		Pageable pageable = PageRequest.of(0, 3);
+		List<Product> bestSelling = orderDetailRepository.findTopSellingProductsByCategory(categoryName, pageable);
+		
+		// Fallback: Nếu chưa có đơn hàng nào, trả về sản phẩm mới nhất của category
+		if (bestSelling.isEmpty()) {
+			return findTop3LatestByCategory(categoryName);
+		}
+		
+		return bestSelling;
 	}
 }

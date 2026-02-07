@@ -38,6 +38,10 @@ public interface ProductService {
     List<Product> findTop3LatestByCategory(String categoryName); // Smartphones
     List<Product> findTop3LatestCamerasByCategory(String categoryName);
     List<Product> findTop3LatestAccessoriesByCategory(String categoryName);
+    
+    // ==== Top Selling Products (based on actual sales) ====
+    List<Product> findTop3BestSelling();
+    List<Product> findTop3BestSellingByCategory(String categoryName);
 
     // ==== Laptops ====
     Page<Product> findLaptopsWithPageable(Pageable pageable);

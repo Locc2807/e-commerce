@@ -1,5 +1,15 @@
 <script th:fragment="script">
-  lucide.createIcons();
+  // Error handler for script loading
+  window.addEventListener('error', function(e) {
+    if (e.target.tagName === 'SCRIPT' || e.target.tagName === 'LINK') {
+      console.error('Failed to load resource:', e.target.src || e.target.href);
+    }
+  }, true);
+
+  // Initialize Lucide icons safely
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
 
   function toggleSidebar() {
     const sidebar = document.getElementById("sidebar");
@@ -23,7 +33,9 @@
       icon.setAttribute("data-lucide", "x");
     }
 
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
   }
 
   function toggleProfileMenu() {
@@ -65,7 +77,9 @@
       showToast("Đã login");
     }
 
-    lucide.createIcons();
+    if (typeof lucide !== 'undefined') {
+      lucide.createIcons();
+    }
   }
 
   function showToast(msg) {
@@ -75,7 +89,7 @@
       toast.classList.remove("hidden");
       setTimeout(() => toast.classList.add("hidden"), 2000);
     } else {
-      alert(msg);
+      console.log(msg);
     }
   }
 
@@ -95,85 +109,121 @@
 
   function toggleSubMenu(id) {
     const submenu = document.getElementById(id);
-    submenu.classList.toggle("hidden");
+    if (submenu) {
+      submenu.classList.toggle("hidden");
+    }
   }
 
   generateStats();
 </script>
 
-<!-- Chart.js -->
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script th:fragment="script">
+<!-- Chart.js Scripts for Dashboard -->
+<script th:fragment="chartScript">
+// Load Chart.js dynamically only when needed
+if (document.getElementById('ordersChart') || 
+    document.getElementById('revenueChart') || 
+    document.getElementById('productChart') || 
+    document.getElementById('userChart')) {
+    
+    // Check if Chart.js is already loaded
+    if (typeof Chart === 'undefined') {
+        const script = document.createElement('script');
+        script.src = 'https://cdn.jsdelivr.net/npm/chart.js';
+        script.onload = function() {
+            initCharts();
+        };
+        script.onerror = function() {
+            console.error('Failed to load Chart.js');
+        };
+        document.head.appendChild(script);
+    } else {
+        initCharts();
+    }
+}
 
-// 1. Đơn hàng theo tháng
-const months = ['1', '2', '3', '4', '5', '6'];
-const ordersData = [10, 20, 15, 30, 25, 40];
+function initCharts() {
+function initCharts() {
+// Only run if chart elements exist (dashboard page)
+if (document.getElementById('ordersChart')) {
+  // 1. Đơn hàng theo tháng
+  const months = ['1', '2', '3', '4', '5', '6'];
+  const ordersData = [10, 20, 15, 30, 25, 40];
 
-new Chart(document.getElementById('ordersChart'), {
-  type: 'bar',
-  data: {
-    labels: months,
-    datasets: [{
-      label: 'Số đơn hàng',
-      data: ordersData,
-      backgroundColor: '#3b82f6'
-    }]
-  },
-  options: { responsive: true, scales: { y: { beginAtZero: true } } }
-});
+  new Chart(document.getElementById('ordersChart'), {
+    type: 'bar',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Số đơn hàng',
+        data: ordersData,
+        backgroundColor: '#3b82f6'
+      }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+}
 
-// 2. Doanh thu theo tháng
-const revenueData = [5, 8, 3, 10, 7, 12];
+if (document.getElementById('revenueChart')) {
+  // 2. Doanh thu theo tháng
+  const months = ['1', '2', '3', '4', '5', '6'];
+  const revenueData = [5, 8, 3, 10, 7, 12];
 
-new Chart(document.getElementById('revenueChart'), {
-  type: 'line',
-  data: {
-    labels: months,
-    datasets: [{
-      label: 'Doanh thu (triệu ₫)',
-      data: revenueData,
-      borderColor: '#10b981',
-      backgroundColor: 'rgba(16,185,129,0.2)',
-      fill: true,
-      tension: 0.4
-    }]
-  },
-  options: { responsive: true, scales: { y: { beginAtZero: true } } }
-});
+  new Chart(document.getElementById('revenueChart'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Doanh thu (triệu ₫)',
+        data: revenueData,
+        borderColor: '#10b981',
+        backgroundColor: 'rgba(16,185,129,0.2)',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+}
 
-// 3. Sản phẩm theo danh mục
-const categoryLabels = ['Laptop', 'Điện thoại', 'Phụ kiện', 'Khác'];
-const categoryData = [120, 200, 80, 50];
+if (document.getElementById('productChart')) {
+  // 3. Sản phẩm theo danh mục
+  const categoryLabels = ['Laptop', 'Điện thoại', 'Phụ kiện', 'Khác'];
+  const categoryData = [120, 200, 80, 50];
 
-new Chart(document.getElementById('productChart'), {
-  type: 'bar',
-  data: {
-    labels: categoryLabels,
-    datasets: [{
-      label: 'Sản phẩm',
-      data: categoryData,
-      backgroundColor: '#6366f1'
-    }]
-  },
-  options: { responsive: true, scales: { y: { beginAtZero: true } } }
-});
+  new Chart(document.getElementById('productChart'), {
+    type: 'bar',
+    data: {
+      labels: categoryLabels,
+      datasets: [{
+        label: 'Sản phẩm',
+        data: categoryData,
+        backgroundColor: '#6366f1'
+      }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+}
 
-// 4. Khách hàng theo tháng
-const userData = [15, 25, 20, 35, 40, 50];
+if (document.getElementById('userChart')) {
+  // 4. Khách hàng theo tháng
+  const months = ['1', '2', '3', '4', '5', '6'];
+  const userData = [15, 25, 20, 35, 40, 50];
 
-new Chart(document.getElementById('userChart'), {
-  type: 'line',
-  data: {
-    labels: months,
-    datasets: [{
-      label: 'Khách hàng mới',
-      data: userData,
-      borderColor: '#f59e0b',
-      backgroundColor: 'rgba(251,191,36,0.2)',
-      fill: true,
-      tension: 0.4
-    }]
-  },
-  options: { responsive: true, scales: { y: { beginAtZero: true } } }
-});
+  new Chart(document.getElementById('userChart'), {
+    type: 'line',
+    data: {
+      labels: months,
+      datasets: [{
+        label: 'Khách hàng mới',
+        data: userData,
+        borderColor: '#f59e0b',
+        backgroundColor: 'rgba(251,191,36,0.2)',
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: { responsive: true, scales: { y: { beginAtZero: true } } }
+  });
+}
+}
 </script>
